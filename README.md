@@ -1,2 +1,3 @@
-# Shamsi_final_test_p2
-Shamsi, This is the Version control for the final test
+Shamsi: here are the instructions for the final test repository.
+
+Shamsi: This app.py is used for python code for the web app.
