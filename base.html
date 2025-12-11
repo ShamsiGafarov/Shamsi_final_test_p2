@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Recipe Finder{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Simplified Navbar Styling */
+        .recipe-navbar {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 1rem 0;
+        }
+        
+        .recipe-navbar .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+            white-space: nowrap;
+        }
+        
+        .recipe-navbar .nav-link {
+            color: rgba(255,255,255,0.9) !important;
+            font-weight: 500;
+            margin: 0 0.2rem;
+            padding: 0.5rem 0.8rem !important;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .recipe-navbar .nav-link:hover,
+        .recipe-navbar .nav-link.active {
+            background-color: rgba(255,255,255,0.2);
+            color: white !important;
+            transform: translateY(-2px);
+        }
+        
+        /* Auth buttons styling */
+        .auth-buttons .btn {
+            margin-left: 0.5rem;
+            border-radius: 0.5rem;
+            white-space: nowrap;
+        }
+        
+        /* Dropdown menu styling */
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+        
+        .dropdown-item {
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        /* Main content area */
+        .main-content {
+            min-height: calc(100vh - 160px);
+            padding-top: 2rem;
+        }
+        
+        /* Footer */
+        .recipe-footer {
+            background-color: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            margin-top: 3rem;
+            padding: 1.5rem 0;
+        }
+        
+        /* Utility classes */
+        .page-header {
+            color: #28a745;
+            margin-bottom: 2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #28a745;
+        }
+
+        /* Auth form styling */
+        .auth-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .auth-header {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border-radius: 15px 15px 0 0;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        /* Star rating */
+        .star-rating {
+            color: #ffc107;
+            font-size: 1.5rem;
+        }
+        
+        .star-rating .far {
+            color: #e4e5e9;
+        }
+
+        /* Action buttons */
+        .action-btn {
+            border: none;
+            background: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .favorited {
+            color: #dc3545;
+        }
+        
+        .bookmarked {
+            color: #28a745;
+        }
+
+        /* Responsive navbar adjustments */
+        @media (max-width: 1200px) {
+            .recipe-navbar .nav-link {
+                padding: 0.5rem 0.6rem !important;
+                font-size: 0.9rem;
+            }
+            
+            .navbar-brand {
+                font-size: 1.3rem;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .recipe-navbar .nav-link {
+                margin: 0.1rem 0;
+                text-align: center;
+            }
+            
+            .auth-buttons {
+                text-align: center;
+                margin-top: 1rem;
+            }
+            
+            .auth-buttons .btn {
+                margin: 0.2rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .recipe-navbar .navbar-nav {
+                text-align: center;
+            }
+            
+            .dropdown-menu {
+                text-align: center;
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark recipe-navbar">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                🍳 Recipe Finder
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">
+                            <i class="fas fa-home me-1 d-lg-none"></i>Home
+                        </a>
+                    </li>
+                    {% if user and user.role in ['chef', 'admin'] %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/upload' %}active{% endif %}" href="/upload">
+                            <i class="fas fa-upload me-1 d-lg-none"></i>Upload Recipe
+                        </a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/recipes' %}active{% endif %}" href="/recipes">
+                            <i class="fas fa-utensils me-1 d-lg-none"></i>Community Recipes
+                        </a>
+                    </li>
+                    
+                    {% if user %}
+                    <!-- Dropdown for user features -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {% if request.path in ['/saved_recipes', '/favourites', '/bookmarks', '/calendar'] %}active{% endif %}" 
+                           href="#" id="userFeaturesDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-1"></i>My Recipes
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="userFeaturesDropdown">
+                            <li>
+                                <a class="dropdown-item {% if request.path == '/saved_recipes' %}active{% endif %}" href="/saved_recipes">
+                                    <i class="fas fa-save me-2"></i>Saved Recipes
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item {% if request.path == '/favourites' %}active{% endif %}" href="/favourites">
+                                    <i class="fas fa-heart me-2"></i>Favourites
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item {% if request.path == '/bookmarks' %}active{% endif %}" href="/bookmarks">
+                                    <i class="fas fa-bookmark me-2"></i>Bookmarks
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item {% if request.path == '/calendar' %}active{% endif %}" href="/calendar">
+                                    <i class="fas fa-calendar me-2"></i>My Calendar
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                </ul>
+                
+                <div class="auth-buttons">
+                    {% if user %}
+                        <div class="d-flex align-items-center">
+                            <span class="navbar-text text-white me-3 d-none d-md-block">
+                                <i class="fas fa-user me-1"></i>{{ user.email }} ({{ user.role }})
+                            </span>
+                            <a href="/profile" class="btn btn-outline-light me-2">
+                                <i class="fas fa-user-circle me-1"></i><span class="d-none d-md-inline">Profile</span>
+                            </a>
+                            <a href="/logout" class="btn btn-outline-light">
+                                <i class="fas fa-sign-out-alt me-1"></i><span class="d-none d-md-inline">Logout</span>
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="d-flex">
+                            <a href="/login" class="btn btn-outline-light me-2">
+                                <i class="fas fa-sign-in-alt me-1"></i><span class="d-none d-md-inline">Login</span>
+                            </a>
+                            <a href="/register" class="btn btn-light">
+                                <i class="fas fa-user-plus me-1"></i><span class="d-none d-md-inline">Register</span>
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="recipe-footer">
+        <div class="container text-center">
+            <p class="mb-0 text-muted">
+                © 2024 Recipe Finder. Made with ❤️ for food lovers.
+            </p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
